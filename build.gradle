@@ -1,0 +1,75 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'nu.studer.jooq' version '3.0.3'
+}
+
+group 'storage'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+mainClassName = "com.zzzkvidi4.storage.Application"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.jooq:jooq:3.11.11'
+    implementation 'org.flywaydb:flyway-core:5.2.4'
+    implementation 'org.postgresql:postgresql:42.2.6'
+    implementation 'org.projectlombok:lombok:1.18.8'
+    implementation 'org.jetbrains:annotations:17.0.0'
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    jooqRuntime 'org.postgresql:postgresql:42.2.6'
+
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'com.opentable.components:otj-pg-embedded:0.13.1'
+}
+
+jooq {
+    version = '3.11.11'
+    edition = 'OSS'
+    sample(sourceSets.main) {
+        jdbc {
+            driver = 'org.postgresql.Driver'
+            url = 'jdbc:postgresql://localhost:5432/storage'
+            user = 'postgres'
+            password = 'postgres'
+        }
+        generator {
+            name = 'org.jooq.codegen.DefaultGenerator'
+            strategy {
+                name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+            }
+            database {
+                name = 'org.jooq.meta.postgres.PostgresDatabase'
+                inputSchema = 'public'
+                forcedTypes {
+                    forcedType {
+                        name = 'varchar'
+                        expression = '.*'
+                        types = 'JSONB?'
+                    }
+                    forcedType {
+                        name = 'varchar'
+                        expression = '.*'
+                        types = 'INET'
+                    }
+                }
+            }
+            generate {
+                relations = true
+                deprecated = false
+                records = true
+                fluentSetters = true
+                daos = true
+            }
+            target {
+                packageName = 'com.zzzkvidi4.storage.generated'
+            }
+        }
+    }
+}
+
+
